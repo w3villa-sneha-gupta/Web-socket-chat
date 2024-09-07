@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Socket.IO Chat</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #323030;
+        }
+
+       
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            max-width: 500px;
+            width: 100%;
+            height: 80vh;
+            background-color: #1f1f1f;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+      
+        .chat-header {
+            background-color: #111;
+            color: #fff;
+            text-align: center;
+            padding: 1.5rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #333;
+        }
+
+      
+        #messages {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            flex-grow: 1;
+            overflow-y: auto;
+            background-color: #1a1a1a;
+            padding: 1rem;
+            scrollbar-width: thin;
+        }
+
+        #messages>li {
+            padding: 0.75rem;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            max-width: 75%;
+            background-color: #444;
+            color: #fff;
+            font-size: 0.9rem;
+            word-wrap: break-word;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #messages>li:nth-child(odd) {
+            align-self: flex-start;
+        }
+
+        #messages>li:nth-child(even) {
+            align-self: flex-end;
+            background-color: #00509e;
+        }
+
+       
+        #form {
+            background-color: #111;
+            padding: 1rem;
+            display: flex;
+            border-top: 1px solid #333;
+        }
+
+        #input {
+            border: none;
+            padding: 0.75rem;
+            flex-grow: 1;
+            background-color: #222;
+            color: #fff;
+            border-radius: 30px;
+            margin-right: 10px;
+            font-size: 1rem;
+        }
+
+        #input:focus {
+            outline: none;
+            background-color: #333;
+        }
+
+        #form>button {
+            background-color: #00509e;
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        #form>button:hover {
+            background-color: #007bff;
+        }
+
+        
+        .scroll-bottom {
+            display: none;
+            position: fixed;
+            right: 20px;
+            bottom: 3rem;
+            background-color: #00509e;
+            color: white;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5rem;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s ease;
+        }
+
+        .scroll-bottom:hover {
+            background-color: #007bff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            Chat Room
+        </div>
+        <ul id="messages"></ul>
+        <form id="form" action="">
+            <input id="input" autocomplete="off" placeholder="Type a message..." /><button>Send</button>
+        </form>
+        <div class="scroll-bottom" id="scrollBottom">⬇️</div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        var socket = io();
+
+        var messages = document.getElementById('messages');
+        var form = document.getElementById('form');
+        var input = document.getElementById('input');
+        var scrollBottom = document.getElementById('scrollBottom');
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (input.value) {
+                socket.emit('chat message', input.value);
+                input.value = '';
+                window.scrollTo(0, document.body.scrollHeight);
+            }
+        });
+
+        socket.on('chat message', function (msg) {
+            var item = document.createElement('li');
+            item.textContent = msg;
+            messages.appendChild(item);
+            scrollBottom.style.display = 'none';
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+
+        messages.addEventListener('scroll', function () {
+            if (messages.scrollHeight - messages.scrollTop > messages.clientHeight + 100) {
+                scrollBottom.style.display = 'block';
+            } else {
+                scrollBottom.style.display = 'none';
+            }
+        });
+
+        scrollBottom.addEventListener('click', function () {
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+    </script>
+</body>
+
+</html>
